@@ -13,146 +13,296 @@ async function prepare_data(url) {
   let response = await fetch(url);
   let snapshots = await response.json();
 
-  let max = 0;
-  let labels = [
-    new Date(2019, 4, 1),
-    new Date(2019, 5, 1),
-    new Date(2019, 6, 1),
-    new Date(2019, 7, 1)
-  ];
-  let datasets = {
-    dtd: {
-      label: "DTD",
-      backgroundColor: COLORS.dtd,
-      data: [10, 10, 8, 5]
-    },
-    properties: {
-      label: "Properties",
-      backgroundColor: COLORS.properties,
-      data: [10, 10, 10, 5]
-    },
-    ftl: {
-      label: "Fluent",
-      backgroundColor: COLORS.fluent,
-      data: [0, 5, 5, 10]
-    },
-    datalabels: {
-      color: "#FFCE56"
-    }
+  let all_labels = [];
+  let all_points = {
+    bar: [],
+    dtd: [],
+    ftl: [],
+    properties: []
   };
+  let month_labels = [];
+  let month_points = {
+    bar: [],
+    dtd: [],
+    ftl: [],
+    properties: []
+  };
+  let month_bars = [];
+
+  let ext_re = /\.(\w+)$/;
+
+  let i = 0;
+
+  for (let { date, data } of snapshots) {
+    i += 1;
+    let total = 0;
+    let snapshot = {
+      properties: 0,
+      dtd: 0,
+      ftl: 0
+    };
+
+    for (let platform of data) {
+      for (let [path, count] of Object.entries(platform)) {
+        total += count;
+
+        let match = ext_re.exec(path);
+        if (match === null) {
+          continue;
+        }
+        let [_, extension] = match;
+        if (snapshot.hasOwnProperty(extension)) {
+          snapshot[extension] += count;
+        }
+      }
+    }
+    let new_label = new Date(date);
+    all_labels.push(new_label);
+    for (let [format, count] of Object.entries(snapshot)) {
+      all_points[format].push(count);
+    }
+
+    let quarter = 1000 * 60 * 60 * 24 * 30 * 3;
+
+    if (
+      month_labels.length == 0 ||
+      month_labels[month_labels.length - 1].getTime() + quarter <=
+        new_label.getTime()
+    ) {
+      month_labels.push(new_label);
+      for (let [format, count] of Object.entries(snapshot)) {
+          if (i > 5){
+
+        month_points[format].push(count);
+          } else {
+
+        month_points[format].push(null);
+          }
+      }
+      if (i > 5) {
+        month_bars.push([
+          snapshot["dtd"],
+          snapshot["dtd"] + snapshot["properties"] + snapshot["ftl"],
+          new_label,
+          snapshot["dtd"],
+          snapshot["properties"],
+          snapshot["ftl"]
+        ]);
+      } else {
+        month_bars.push(null);
+      }
+    }
+  }
 
   return {
-    max,
-    labels,
-    datasets: [
+    all_labels: all_labels,
+    month_labels: month_labels,
+    data: {
+      datasets: [
+        // Data
         {
-            label: ["Foo", "Faa", "Fii", "Fee"],
-            backgroundColor: 'rgb(255, 99, 132)',
-            borderColor: 'rgb(255, 255, 255)',
-            data: [0, 10, 5, 2]
-        }
-    ]
+          type: "line",
+          label: "DTD",
+          backgroundColor: "#ED0083",
+          borderColor: "rgba(0,0,0,0)",
+          borderWidth: 0,
+          yAxisID: "background-y-axis",
+          xAxisID: "background-x-axis",
+          data: all_points["dtd"],
+          datalabels: {
+            display: false
+          },
+          pointRadius: 0,
+          pointHoverRadius: 0
+        },
+        {
+          type: "line",
+          label: "Properties",
+          backgroundColor: "#45A1FF",
+          borderColor: "rgba(0,0,0,0)",
+          borderWidth: 0,
+          yAxisID: "background-y-axis",
+          xAxisID: "background-x-axis",
+          data: all_points["properties"],
+          datalabels: {
+            display: false
+          },
+          pointRadius: 0,
+          pointHoverRadius: 0
+        },
+        {
+          type: "line",
+          label: "Fluent",
+          backgroundColor: "#3BDDAA",
+          borderColor: "rgba(0,0,0,0)",
+          borderWidth: 0,
+          yAxisID: "background-y-axis",
+          xAxisID: "background-x-axis",
+          data: all_points["ftl"],
+          datalabels: {
+            display: false
+          },
+          pointRadius: 0,
+          pointHoverRadius: 0
+        },
+        // Dots
+        {
+          type: "line",
+          label: "DTD",
+          backgroundColor: "#ED0083",
+          borderColor: "white",
+          pointRadius: 4,
+          pointHoverRadius: 4,
+          showLine: false,
+          tooltips: {
+            enabled: false
+          },
+          data: month_points["dtd"],
+          fill: false,
+          yAxisID: "main-y-axis",
+          xAxisID: "main-x-axis",
+          datalabels: {
+            display: false
+          }
+        },
+        {
+          type: "line",
+          label: "Properties",
+          backgroundColor: "#45A1FF",
+          borderColor: "white",
+          pointRadius: 4,
+          pointHoverRadius: 4,
+          showLine: false,
+          tooltips: {
+            enabled: false
+          },
+          data: month_points["properties"],
+          fill: false,
+          yAxisID: "main-y-axis",
+          xAxisID: "main-x-axis",
+          datalabels: {
+            display: false
+          }
+        },
+        {
+          type: "line",
+          label: "Fluent",
+          backgroundColor: "#3BDDAA",
+          borderColor: "white",
+          pointRadius: 4,
+          pointHoverRadius: 4,
+          showLine: false,
+          tooltips: {
+            enabled: false
+          },
+          data: month_points["ftl"],
+          fill: false,
+          yAxisID: "main-y-axis",
+          xAxisID: "main-x-axis",
+          datalabels: {
+            display: false
+          }
+        },
+        {
+          type: "line",
+          label: "Fake one to make shadow work",
+          backgroundColor: "rgba(0,0,0,0)",
+          borderColor: "rgba(0,0,0,0)",
+          pointRadius: 5,
+          pointHoverRadius: 5,
+          showLine: false,
+          tooltips: {
+            enabled: false
+          },
+          data: [],
+          fill: false,
+          yAxisID: "main-y-axis",
+          xAxisID: "main-x-axis",
+          datalabels: {
+            display: false
+          }
+        },
+        // Bars
+        {
+          type: "bar",
+          label: "Average",
+          yAxisID: "main-y-axis",
+          xAxisID: "main-x-axis",
+          backgroundColor: "rgba(255,255,255,0.9)",
+          hoverBackgroundColor: "rgba(255,255,255,0.9)",
+          borderWidth: 0,
+          data: month_bars,
+          datalabels: {
+            display: true,
+            backgroundColor: "white",
+            borderRadius: 5,
+            padding: {
+              left: 8,
+              right: 8
+            },
+            color: "#343434",
+            font: {
+              family: "Fira Sans",
+              style: 400,
+              size: 14,
+              lineHeight: 1.6
+            },
+            formatter: function(value, context) {
+              if (value === null) {
+                return "";
+              }
+              let result = value[2].toLocaleString("en-US", {
+                month: "short",
+                year: "numeric"
+              });
+              result += "\n";
+              result += `!F\u2B24 ${value[5]}\n`;
+              result += `!P\u2B24 ${value[4]}\n`;
+              result += `!D\u2B24 ${value[3]}`;
+              return result;
+            }
+          }
+        },
+      ]
+    }
   };
 }
 
-function create_chart(selector, { max, ...data }) {
-//   let draw = Chart.controllers.line.prototype.draw;
-//   Chart.controllers.line = Chart.controllers.line.extend({
-//     draw: function() {
-//       draw.apply(this, arguments);
-//       let ctx = this.chart.chart.ctx;
-//       let _stroke = ctx.stroke;
-//       ctx.stroke = function() {
-//         ctx.save();
-//         // Points are white
-//         if (this.strokeStyle == "#ffffff") {
-//           ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
-//           ctx.shadowBlur = 5;
-//           ctx.shadowOffsetX = 2;
-//           ctx.shadowOffsetY = 5;
-//         }
-//         _stroke.apply(this, arguments);
-//         ctx.restore();
-//       };
-//     }
-//   });
+function create_chart(selector, { all_labels, month_labels, data }) {
+  let draw = Chart.controllers.line.prototype.draw;
+  Chart.controllers.line = Chart.controllers.line.extend({
+    draw: function(ease) {
+      draw.call(this, ease);
+      let ctx = this.chart.chart.ctx;
+      let _stroke = ctx.stroke;
+      ctx.stroke = function() {
+        ctx.save();
+        // Points are white
+        if (this.strokeStyle == "#ffffff") {
+          ctx.shadowColor = "rgba(0, 0, 0, 0.22)";
+          ctx.shadowBlur = 1;
+          ctx.shadowOffsetX = 1;
+          ctx.shadowOffsetY = 1;
+        }
+        _stroke.apply(this, arguments);
+        ctx.restore();
+      };
+    }
+  });
 
   let ctx = document.querySelector(selector).getContext("2d");
   return new Chart(ctx, {
-    type: "bar",
-    data: {
-        labels: ['Jan', 'Feb', 'March', 'April'],
-        datasets: [
-            {
-                type: 'bar',
-                label: 'Average',
-                backgroundColor: "rgba(255,255,255,0.5)",
-                borderWidth: 0,
-                data: [[3956, 3956+8354+470], [3956, 3956+8354+470], [3956, 3956+8354+470], [3956, 3956+8354+470]],
-                datalabels: {
-                    display: true,
-                },
-            },
-            {
-                type: 'line',
-                label: 'DTD',
-                backgroundColor: '#eb3583',
-                data: [3956, 3956, 3956, 3956],
-                datalabels: {
-                    display: false,
-                },
-            },
-            {
-                type: 'line',
-                label: 'Properties',
-                backgroundColor: '#47a0f8',
-                data: [8354, 8354, 8354, 8354],
-                datalabels: {
-                    display: false,
-                },
-            },
-            {
-                type: 'line',
-                label: 'Fluent',
-                backgroundColor: '#66deaa',
-                data: [470, 470, 470, 470],
-                datalabels: {
-                    display: false,
-                },
-            },
-        ]
-    },
+    data: data,
     options: {
-      plugins: {
-        datalabels: {
-          backgroundColor: 'white',
-          borderRadius: 4,
-          color: "black",
-          font: {
-            family: 'icomoon',
-            size: 20
-          },
-          formatter: function(value, context) {
-            return "Jan 2018\n\ue9e1 470\n\ue9e5 8354\n\ue9e7 3956";
-          }
-        }
+      title: {
+        display: true,
+        position: "left",
+        text: "Number of localizable strings in mozilla-central",
+        fontStyle: 500,
+        fontSize: 16,
+        fontFamily: "Fira Sans",
+        fontColor: "#828282"
       },
-    //   annotation: {
-    //     annotations: [
-    //       {
-    //         drawTime: "afterDatasetsDraw",
-    //         type: "box",
-    //         xMin: new Date(2019, 6, 1),
-    //         xMax: new Date(2019, 6, 1),
-    //         yMin: 8,
-    //         yMax: 23,
-    //         xScaleID: "x-axis-0",
-    //         yScaleID: "y-axis-0",
-    //         borderWidth: 5,
-    //         borderColor: "rgba(255, 255, 255, 0.5)"
-    //       }
-    //     ]
-    //   },
       animation: {
         duration: 0
       },
@@ -160,35 +310,76 @@ function create_chart(selector, { max, ...data }) {
         yAxes: [
           {
             stacked: true,
+            id: "main-y-axis",
             display: true,
             color: "#ffffff",
-            lineWidth: 3,
+            gridLines: {
+              display: false
+            },
+            ticks: {
+              padding: 15,
+              fontStyle: "400",
+              fontSize: 15,
+              fontFamily: "Fira Sans",
+              fontColor: "#909090",
+            }
+          },
+          {
+            stacked: true,
+            id: "background-y-axis",
+            display: false,
+            color: "#ffffff"
           }
         ],
         xAxes: [
           {
             display: true,
-            barThickness: 3,
-            maxBarThickness: 3,
-            // type: "time",
-            // time: {
-            //   unit: "month"
-            // }
+            id: "main-x-axis",
+            barThickness: 1,
+            type: "time",
+            time: {
+              unit: "month",
+              stepSize: 3
+            },
+            labels: month_labels,
+            ticks: {
+              lineHeight: 2.4,
+              fontStyle: "500",
+              fontSize: 16,
+              fontFamily: "Fira Sans",
+              fontColor: "#909090"
+            },
+            gridLines: {
+              display: false
+            }
+          },
+          {
+            display: false,
+            id: "background-x-axis",
+            type: "time",
+            time: {
+              unit: "month",
+              stepSize: 3
+            },
+            labels: all_labels
           }
         ]
       },
       tooltips: {
-        enabled: false,
+        enabled: false
       },
       elements: {
         point: {
           borderColor: "#ffffff",
-          borderWidth: 3,
-          hoverBorderWidth: 3,
+          borderWidth: 2,
+          hoverBorderWidth: 2,
           hoverRadius: 5,
           hoverBorderColor: "#ffffff",
-          radius: 5
+          radius: 0
         }
+      },
+      legend: {
+        display: false
       }
     }
   });
