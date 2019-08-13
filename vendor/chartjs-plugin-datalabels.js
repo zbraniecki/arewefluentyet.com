@@ -502,7 +502,6 @@ function textGeometry(rect, align, font) {
 }
 
 function drawTextLine(ctx, text, cfg) {
-	console.log(text);
 	var shadow = ctx.shadowBlur;
 	var stroked = cfg.stroked;
 	var x = rasterize(cfg.x);
@@ -524,7 +523,6 @@ function drawTextLine(ctx, text, cfg) {
 			let type = text.substr(1, 1);
 			text = text.substr(2);
 		  ctx.fillText(text, x, y, w);
-			console.log(type);
 			switch (type) {
 				case 'F':
   			  ctx.fillStyle = '#3BDDAA';

@@ -65,21 +65,22 @@ async function prepare_data(url) {
     let quarter = 1000 * 60 * 60 * 24 * 30 * 3;
 
     if (
-      month_labels.length == 0 ||
+      i == snapshots.length ||
+      (month_labels.length < 1 ||
       month_labels[month_labels.length - 1].getTime() + quarter <=
-        new_label.getTime()
+        new_label.getTime())
     ) {
+        if (i === snapshots.length) {
+            month_labels.pop();
+            month_points['dtd'].pop();
+            month_points['properties'].pop();
+            month_points['ftl'].pop();
+            month_bars.pop();
+        }
       month_labels.push(new_label);
       for (let [format, count] of Object.entries(snapshot)) {
-          if (i > 5){
-
         month_points[format].push(count);
-          } else {
-
-        month_points[format].push(null);
-          }
       }
-      if (i > 5) {
         month_bars.push([
           snapshot["dtd"],
           snapshot["dtd"] + snapshot["properties"] + snapshot["ftl"],
@@ -88,9 +89,6 @@ async function prepare_data(url) {
           snapshot["properties"],
           snapshot["ftl"]
         ]);
-      } else {
-        month_bars.push(null);
-      }
     }
   }
 
@@ -234,6 +232,8 @@ async function prepare_data(url) {
           data: month_bars,
           datalabels: {
             display: true,
+            anchor: 'center',
+            align: ['right', 'center', 'center', 'center', 'center', 'center', 'center',  'left', 'left'],
             backgroundColor: "white",
             borderRadius: 5,
             padding: {
