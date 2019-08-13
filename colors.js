@@ -9,9 +9,9 @@ export default {
     */
 
     /* CMYK */
-    fluent: "#00cffa",
-    properties: "#ffce38",
-    dtd: "#ff0038",
+    fluent: "#66deaa",
+    properties: "#47a0f8",
+    dtd: "#eb3583",
     other: "#020509",
     /*/
 
