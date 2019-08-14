@@ -533,6 +533,12 @@ function drawTextLine(ctx, text, cfg) {
 				case 'P':
   			  ctx.fillStyle = '#45A1FF';
 					break;
+				case 'I':
+  			  ctx.fillStyle = 'brown';
+					break;
+				case 'C':
+  			  ctx.fillStyle = 'purple';
+					break;
 			};
 			ctx.fillText("\u2B24", x, y, w);
 			ctx.fillStyle = '#343434';
