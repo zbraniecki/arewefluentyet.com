@@ -73,7 +73,28 @@ const State = {
           style: 400,
         },
       },
+      background: "white",
+      border: {
+        radius: 5,
+      }
     },
+    points: {
+      color: "#ffffff",
+      shadow: {
+        color: "rgba(0, 0, 0, 0.22)",
+        blur: 7,
+        offsetX: 1,
+        offsetY: 1,
+      },
+      border: {
+        width: 2,
+      },
+      radius: 4,
+    },
+    bar: {
+      color: "rgba(255, 255, 255, 0.7)",
+      width: 1,
+    }
   },
   categories: isDashboard ? ["dtd", "properties", "ftl"] : ["ini", "inc", "dtd", "properties", "ftl"],
   // categories: ["dtd", "ftl"],

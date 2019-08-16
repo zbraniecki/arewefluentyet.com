@@ -128,16 +128,16 @@ async function prepare_data(url) {
               let value = Math.round((y - ftlY) - distance / 2 - boxHeight / 2);
               return value;
             },
-            backgroundColor: "white",
-            borderRadius: 5,
+            backgroundColor: State.theme.datalabels.background,
+            borderRadius: State.theme.datalabels.border.radius,
             padding: {
               left: 8,
               right: 8
             },
-            color: "#343434",
+            color: State.theme.main.font.color,
             font: {
-              family: "Fira Sans",
-              style: 400,
+              family: State.theme.main.font.family,
+              style: State.theme.main.font.weight,
               size: 14,
               lineHeight: 1.6
             },
@@ -168,8 +168,8 @@ async function prepare_data(url) {
       type: "line",
       label: State.theme.categories.labels[category],
       backgroundColor: State.theme.categories.colors[category],
-      borderColor: "rgba(0,0,0,0)",
       borderWidth: 0,
+      borderColor: "rgb(0,0,0,0)",
       yAxisID: "main-y-axis",
       xAxisID: "background-x-axis",
       data: all_points[category],
@@ -207,7 +207,8 @@ async function prepare_data(url) {
         type: "line",
         label: `${category} Dots`,
         backgroundColor: inBar ? State.theme.categories.colors[category] : "rgba(0,0,0,0)",
-        borderColor: inBar ? "white" : "rgba(0,0,0,0)",
+        borderWidth: inBar ? State.theme.points.border.width : 0,
+        borderColor: State.theme.points.color,
         showLine: false,
         tooltips: {
           enabled: false
@@ -232,25 +233,25 @@ async function prepare_data(url) {
       label: "Average",
       yAxisID: "main-y-axis",
       xAxisID: "main-x-axis",
-      backgroundColor: "rgba(255,255,255,0.9)",
-      hoverBackgroundColor: "rgba(255,255,255,0.9)",
+      backgroundColor: State.theme.bar.color,
+      hoverBackgroundColor: State.theme.bar.color,
       borderWidth: 0,
       data: month_bars,
       datalabels: {
         display: "auto",
         anchor: "center",
         align: aligns,
-        backgroundColor: "white",
-        borderRadius: 5,
-        padding: {
-          left: 8,
-        },
-        color: "#343434",
+        backgroundColor: State.theme.datalabels.background,
+        borderRadius: State.theme.datalabels.border.radius,
+        color: State.theme.main.font.color,
         font: {
           family: State.theme.main.font.family,
-          style: State.theme.datalabels.labels.font.style,
-          size: Page.getDatalabelsLabelFontSize(),
+          style: State.theme.main.font.weight,
+          size: 14,
           lineHeight: 1.6
+        },
+        padding: {
+          left: 8,
         },
         formatter: function(value, ctx) {
           if (value === null) {
