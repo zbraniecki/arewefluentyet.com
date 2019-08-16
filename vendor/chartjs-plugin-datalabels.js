@@ -456,6 +456,11 @@ function drawFrame(ctx, rect, model) {
 		return;
 	}
 
+	ctx.shadowOffsetX = 2;
+	ctx.shadowOffsetY = 2;
+	ctx.shadowBlur    = 20;
+	ctx.shadowColor   = "rgba(0,0,0,0.3)";
+
 	ctx.beginPath();
 
 	helpers$1.canvas.roundedRect(
@@ -479,6 +484,11 @@ function drawFrame(ctx, rect, model) {
 		ctx.lineJoin = 'miter';
 		ctx.stroke();
 	}
+
+	ctx.shadowOffsetX = 0;
+	ctx.shadowOffsetY = 0;
+	ctx.shadowBlur    = 0;
+	ctx.shadowColor   = "white";
 }
 
 function textGeometry(rect, align, font) {
@@ -520,32 +530,24 @@ function drawTextLine(ctx, text, cfg) {
 		}
 
 		if (text[0] == "!") {
-			let type = text.substr(1, 1);
-			text = text.substr(2);
-		  ctx.fillText(text, x, y, w);
-			switch (type) {
-				case 'F':
-  			  ctx.fillStyle = '#3BDDAA';
-					break;
-				case 'D':
-  			  ctx.fillStyle = '#ED0083';
-					break;
-				case 'P':
-  			  ctx.fillStyle = '#45A1FF';
-					break;
-				case 'I':
-  			  ctx.fillStyle = 'brown';
-					break;
-				case 'C':
-  			  ctx.fillStyle = 'purple';
-					break;
-			};
+			let label = text.substr(4, text.indexOf('|') - 4);
+			let value = text.substr(text.indexOf('|') + 1);
+			if (isNaN(label)) {
+			  ctx.fillText(`\u2B24 ${label}: ${value}`, x, y, w);
+			} else {
+			  ctx.fillText(`\u2B24 ${value}`, x, y, w);
+			}
+			let category = isNaN(label) ? getCategoryForLabel(label) : State.categories[label];
+			let color = State.theme.categories.colors[category];
+			ctx.fillStyle = color;
 			ctx.fillText("\u2B24", x, y, w);
-			ctx.fillStyle = '#343434';
+			ctx.fillStyle = State.theme.main.font.color;
 		} else {
-			ctx.font = "500 15px \"Fira Sans\"";
+			let titleFontSize = Page.getDatalabelsTitleFontSize();
+			let labelFontSize = Page.getDatalabelsLabelFontSize();
+			ctx.font = `${State.theme.datalabels.title.font.style} ${titleFontSize}px \"${State.theme.main.font.family}\"`;
 		  ctx.fillText(text, x, y, w);
-			ctx.font = "400 14px \"Fira Sans\"";
+			ctx.font = `${State.theme.datalabels.labels.font.style} ${labelFontSize}px \"${State.theme.main.font.family}\"`;
 		}
 
 		if (shadow && stroked) {
@@ -948,9 +950,9 @@ function compute$1(labels) {
 		var h1 = s1._hidable;
 
 		if ((h0 && h1) || h1) {
-			s1._visible = false;
-		} else if (h0) {
 			s0._visible = false;
+		} else if (h0) {
+			s1._visible = false;
 		}
 	});
 }
